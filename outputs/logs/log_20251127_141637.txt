@@ -1,8 +1,0 @@
-[2025-11-27 14:16:37] [INFO] [SSA-PromptTuning] 
-============================================================
-[2025-11-27 14:16:37] [INFO] [SSA-PromptTuning]   Starting SSA Optimization
-[2025-11-27 14:16:37] [INFO] [SSA-PromptTuning] ============================================================
-
-[2025-11-27 14:16:37] [INFO] [SSA-PromptTuning] Initialized population with 20 squirrels
-[2025-11-27 14:16:37] [WARNING] [SSA-PromptTuning] This might be an issue
-[2025-11-27 14:16:37] [ERROR] [SSA-PromptTuning] Error occurred!

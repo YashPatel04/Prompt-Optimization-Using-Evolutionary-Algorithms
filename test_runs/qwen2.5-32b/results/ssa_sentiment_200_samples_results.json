@@ -1,0 +1,244 @@
+{
+  "config": {
+    "dataset_size": 200,
+    "population_size": 20,
+    "max_iterations": 35,
+    "Gc": 1.9,
+    "Pdp": 0.1,
+    "early_stopping_patience": 15,
+    "ollama_model": "qwen2.5:32b",
+    "ollama_base_url": "http://localhost:1561",
+    "ollama_temperature": 0.0,
+    "use_cache": true,
+    "use_perturbation": true,
+    "fitness_metrics": "combined",
+    "experiment_name": "ssa_sentiment_200_samples",
+    "seed": 42,
+    "output_dir": "outputs"
+  },
+  "history": {
+    "best_fitness": [
+      0.2799730392156862,
+      0.24997797794953397,
+      0.24997797794953397,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943,
+      0.23972205882352943
+    ],
+    "worst_fitness": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "mean_fitness": [
+      0.553255104139698,
+      0.5169084660868325,
+      0.45185252154923355,
+      0.3705294725193822,
+      0.33782307612545664,
+      0.3336741929070795,
+      0.3289454507482157,
+      0.3276139884210959,
+      0.32757556008842903,
+      0.32257205266385963,
+      0.32256043384966726,
+      0.3219447440824925,
+      0.3209329534033189,
+      0.31854596260318474,
+      0.3175202981028984,
+      0.3165117106753718,
+      0.31602685957284854,
+      0.31602685957284854,
+      0.31602685957284854
+    ],
+    "std_fitness": [
+      0.26909542388804875,
+      0.2820541344536759,
+      0.23806795897994418,
+      0.17361799316946183,
+      0.15983759768164027,
+      0.1608084857925768,
+      0.16135782057762038,
+      0.1612726473826582,
+      0.16128131747625282,
+      0.16173975081986913,
+      0.1617456935986494,
+      0.1619253155376602,
+      0.16224635375375163,
+      0.16280366430548887,
+      0.16326406493301923,
+      0.1636766291875484,
+      0.1638877541684653,
+      0.1638877541684653,
+      0.1638877541684653
+    ],
+    "population_snapshots": [
+      {
+        "iteration": 0,
+        "best_fitness": 0.2799730392156862,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.24997797794953397,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.24997797794953397,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.23972205882352943,
+        "population_size": 20
+      }
+    ]
+  },
+  "best_squirrel": {
+    "fitness": 0.23972205882352943,
+    "genome": [
+      0.0,
+      1.99,
+      2.3233005734640018,
+      1.8817784489673206,
+      0.16698319673493534,
+      1.1819064831725528,
+      1.333570164903769,
+      0.0,
+      0.08462563101086687,
+      3.393795242263051
+    ]
+  },
+  "best_prompt": "You are a natural language understanding specialist.\n\nClassify the sentiment of this text\n\nFirst identify key words, then classify.\n\nConstraints: Be careful with your classification.\n\nOutput format: Respond with only the label: positive, negative, or neutral.\n\nText: {input}\nResult:",
+  "metrics": {
+    "eval_fitness": 0.2595439876776108,
+    "eval_accuracy": 0.7404560123223892
+  },
+  "statistics": {
+    "convergence_rate": 0.0022361655773420444,
+    "improvement_summary": {
+      "initial_fitness": 0.2799730392156862,
+      "final_fitness": 0.23972205882352943,
+      "improvement_percent": 14.376734454473011,
+      "total_iterations": 19,
+      "iterations_to_improvement": 1
+    },
+    "plateau_info": {
+      "is_plateau": true,
+      "plateau_iteration": 3,
+      "improvement_in_window": 0.0
+    },
+    "final_population_stats": {
+      "best": 0.23972205882352943,
+      "worst": 1.0,
+      "mean": 0.31602685957284854,
+      "std": 0.1638877541684653
+    }
+  },
+  "timestamp": "2025-11-27T20:53:18.256525"
+}

@@ -1,0 +1,10 @@
+label the mood of this text
+
+Let's approach this systematically.
+
+Constraints: Classify accurately and carefully.
+
+Output format: Respond with only the label: positive, negative, or neutral.
+
+Text: {input}
+Result:

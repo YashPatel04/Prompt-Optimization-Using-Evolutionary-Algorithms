@@ -1,0 +1,126 @@
+{
+  "config": {
+    "dataset_size": 50,
+    "population_size": 20,
+    "max_iterations": 50,
+    "Gc": 1.9,
+    "Pdp": 0.1,
+    "early_stopping_patience": 10,
+    "ollama_model": "qwen2.5:32b",
+    "ollama_base_url": "http://localhost:1561",
+    "ollama_temperature": 0.0,
+    "use_cache": true,
+    "use_perturbation": true,
+    "fitness_metrics": "combined",
+    "experiment_name": "ssa_sentiment_50_samples",
+    "seed": 42,
+    "output_dir": "outputs"
+  },
+  "history": {
+    "best_fitness": [
+      0.22138400921379642,
+      0.22138400921379642,
+      0.14118431372549017,
+      0.14118431372549017,
+      0.14118431372549017,
+      0.14118431372549017,
+      0.14118431372549017,
+      0.14118431372549017,
+      0.14118431372549017,
+      0.14118431372549017,
+      0.14118431372549017,
+      0.14118431372549017,
+      0.14118431372549017
+    ],
+    "worst_fitness": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "mean_fitness": [
+      0.5332632174074756,
+      0.4888310377706116,
+      0.35763060534014424,
+      0.31443461489894087,
+      0.291995098656925,
+      0.28876368889767406,
+      0.28646667453637403,
+      0.2854061560178555,
+      0.2854061560178555,
+      0.283399596594086,
+      0.28050876513701406,
+      0.27925142828277266,
+      0.27925142828277266
+    ],
+    "std_fitness": [
+      0.2827389234760173,
+      0.2983622641874737,
+      0.2189937300162571,
+      0.17367861033227014,
+      0.17373643234043687,
+      0.17364380155825443,
+      0.17342561930715197,
+      0.17390077164389417,
+      0.17390077164389417,
+      0.17497784893699006,
+      0.1769173469465576,
+      0.1771105745771728,
+      0.1771105745771728
+    ],
+    "improvements": 1
+  },
+  "best_squirrel": {
+    "fitness": 0.14118431372549017,
+    "genome": [
+      0.15648916793448256,
+      1.418359905609867,
+      3.2324932980150867,
+      1.896476159706246,
+      0.4060272131422259,
+      0.45912746436775453,
+      1.9538995393164957,
+      0.7902936178464088,
+      0.5427827288673847,
+      0.013421193720352054
+    ]
+  },
+  "best_prompt": "label the mood of this text\n\nLet's approach this systematically.\n\nConstraints: Classify accurately and carefully.\n\nOutput format: Respond with only the label: positive, negative, or neutral.\n\nText: {input}\nResult:",
+  "metrics": {
+    "eval_fitness": 0.16064749163879594,
+    "eval_accuracy": 0.8393525083612041
+  },
+  "statistics": {
+    "proof_fitness_improvement": {
+      "initial": 0.22138400921379642,
+      "final": 0.14118431372549017,
+      "absolute_improvement": 0.08019969548830624,
+      "relative_improvement_pct": 36.22650785534165,
+      "num_improvements": 1
+    },
+    "proof_monotonic": true,
+    "proof_convergence": {
+      "initial_std": 0.2827389234760173,
+      "final_std": 0.1771105745771728,
+      "diversity_reduction_pct": 37.35896975210921
+    },
+    "proof_mean_improvement": 47.63347270783317,
+    "evidence_score": "4/5",
+    "final_population_stats": {
+      "best": 0.14118431372549017,
+      "worst": 1.0,
+      "mean": 0.27925142828277266,
+      "std": 0.1771105745771728
+    }
+  },
+  "timestamp": "2025-11-27T23:02:49.984923"
+}

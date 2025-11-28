@@ -2,3 +2,4 @@ generate.py
 /data/cache
 
 __pycache__/
+/outputs/cache/*

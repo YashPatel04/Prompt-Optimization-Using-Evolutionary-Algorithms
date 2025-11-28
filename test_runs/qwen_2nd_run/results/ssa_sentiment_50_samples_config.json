@@ -1,0 +1,17 @@
+{
+  "dataset_size": 50,
+  "population_size": 20,
+  "max_iterations": 50,
+  "Gc": 1.9,
+  "Pdp": 0.1,
+  "early_stopping_patience": 10,
+  "ollama_model": "qwen2.5:32b",
+  "ollama_base_url": "http://localhost:1561",
+  "ollama_temperature": 0.0,
+  "use_cache": true,
+  "use_perturbation": true,
+  "fitness_metrics": "combined",
+  "experiment_name": "ssa_sentiment_50_samples",
+  "seed": 42,
+  "output_dir": "outputs"
+}

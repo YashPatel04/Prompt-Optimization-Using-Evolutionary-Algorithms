@@ -1,0 +1,13 @@
+Analyze the emotional tone of the following statement
+
+Examples:
+- Positive: "Excellent work!"
+- Negative: "Disappointing."
+- Neutral: "It rained today."
+
+Constraints: Classify with high precision. Double-check your reasoning.
+
+Output format: Provide your classification with a brief explanation.
+
+Text: {input}
+Result:

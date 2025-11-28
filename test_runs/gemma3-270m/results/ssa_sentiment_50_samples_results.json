@@ -1,0 +1,226 @@
+{
+  "config": {
+    "dataset_size": 50,
+    "population_size": 20,
+    "max_iterations": 30,
+    "Gc": 1.9,
+    "Pdp": 0.1,
+    "early_stopping_patience": 10,
+    "ollama_model": "gemma3:270m",
+    "ollama_base_url": "http://0.0.0.0:1561",
+    "ollama_temperature": 0.0,
+    "use_cache": true,
+    "use_perturbation": true,
+    "fitness_metrics": "combined",
+    "experiment_name": "ssa_sentiment_50_samples",
+    "seed": 42,
+    "output_dir": "outputs"
+  },
+  "history": {
+    "best_fitness": [
+      0.5662756598240469,
+      0.5286814814814815,
+      0.5286814814814815,
+      0.48812488350419386,
+      0.4772681114551084,
+      0.4772681114551084,
+      0.4232842105263158,
+      0.4232842105263158,
+      0.4232842105263158,
+      0.4232842105263158,
+      0.4232842105263158,
+      0.4232842105263158,
+      0.4232842105263158,
+      0.4232842105263158,
+      0.4232842105263158,
+      0.4232842105263158,
+      0.4232842105263158
+    ],
+    "worst_fitness": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "mean_fitness": [
+      0.7702985057860622,
+      0.7080975937499355,
+      0.6754926398744807,
+      0.6653816172211974,
+      0.6492717937455179,
+      0.6394435877016148,
+      0.6248743219737488,
+      0.6209621420408198,
+      0.6188185097497684,
+      0.6173670542809215,
+      0.6155054983389847,
+      0.5984013451272159,
+      0.581447682000087,
+      0.5750891561323271,
+      0.5610867763331293,
+      0.5610867763331293,
+      0.5572795543274907
+    ],
+    "std_fitness": [
+      0.16196003539095644,
+      0.15651390977131344,
+      0.14885652910789796,
+      0.15460472063033043,
+      0.15300164076875855,
+      0.15548136683860503,
+      0.16340471317461144,
+      0.16578407623281277,
+      0.1672095224948777,
+      0.16501615420439655,
+      0.1628241673186129,
+      0.13775720311759454,
+      0.11961990617357862,
+      0.11938299627542305,
+      0.12327586934333304,
+      0.12327586934333304,
+      0.12222172352289319
+    ],
+    "population_snapshots": [
+      {
+        "iteration": 0,
+        "best_fitness": 0.5662756598240469,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.5286814814814815,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.5286814814814815,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.48812488350419386,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4772681114551084,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4772681114551084,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      },
+      {
+        "iteration": 0,
+        "best_fitness": 0.4232842105263158,
+        "population_size": 20
+      }
+    ]
+  },
+  "best_squirrel": {
+    "fitness": 0.4232842105263158,
+    "genome": [
+      2.6352307079565453,
+      0.9749503275553552,
+      0.7058305559300985,
+      3.6765144026885737,
+      1.0,
+      0.18424203978110645,
+      2.1839482287127385,
+      0.8438969533531293,
+      1.0530622627368151,
+      5.669868411447153
+    ]
+  },
+  "best_prompt": "Analyze the emotional tone of the following statement\n\nExamples:\n- Positive: \"Excellent work!\"\n- Negative: \"Disappointing.\"\n- Neutral: \"It rained today.\"\n\nConstraints: Classify with high precision. Double-check your reasoning.\n\nOutput format: Provide your classification with a brief explanation.\n\nText: {input}\nResult:",
+  "metrics": {
+    "eval_fitness": 0.5763798627002289,
+    "eval_accuracy": 0.4236201372997711
+  },
+  "statistics": {
+    "convergence_rate": 0.008936965581108194,
+    "improvement_summary": {
+      "initial_fitness": 0.5662756598240469,
+      "final_fitness": 0.4232842105263158,
+      "improvement_percent": 25.251208809179857,
+      "total_iterations": 17,
+      "iterations_to_improvement": 1
+    },
+    "plateau_info": {
+      "is_plateau": true,
+      "plateau_iteration": 6,
+      "improvement_in_window": 0.0
+    },
+    "final_population_stats": {
+      "best": 0.4232842105263158,
+      "worst": 1.0,
+      "mean": 0.5572795543274907,
+      "std": 0.12222172352289319
+    }
+  },
+  "timestamp": "2025-11-27T19:39:22.505409"
+}

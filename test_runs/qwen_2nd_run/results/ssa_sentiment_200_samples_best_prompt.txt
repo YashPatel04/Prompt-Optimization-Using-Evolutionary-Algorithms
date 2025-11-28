@@ -1,0 +1,12 @@
+You are a natural language understanding specialist.
+
+Classify the sentiment of this text
+
+First identify key words, then classify.
+
+Constraints: Be careful with your classification.
+
+Output format: Respond with only the label: positive, negative, or neutral.
+
+Text: {input}
+Result:

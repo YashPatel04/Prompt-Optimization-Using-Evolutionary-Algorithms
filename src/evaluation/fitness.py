@@ -24,7 +24,7 @@ class FitnessCalculator:
             ground_truth: Ground truth labels
         
         Returns:
-            Accuracy score (0-1), converted to error (1 - accuracy)
+            Accuracy score based fitness score (0-1). lower is better. 
         """
         # Normalize predictions
         predictions = [self._normalize_label(p) for p in predictions]

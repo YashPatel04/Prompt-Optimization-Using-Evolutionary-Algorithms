@@ -1,10 +1,11 @@
 import numpy as np
-from typing import List, Tuple, Callable, Dict
+from typing import List, Tuple, Callable, Dict, Optional
 from src.ssa.population import Population
 from src.ssa.movement import Movement
 from src.ssa.squirrel import Squirrel
 from src.genome.genome import GenomeConfig
 import json
+
 
 class SSAOptimizer:
     """
@@ -42,7 +43,7 @@ class SSAOptimizer:
             'worst_fitness': [],
             'mean_fitness': [],
             'std_fitness': [],
-            'population_snapshots': []
+            'improvements': 0
         }
     
     def initialize(self):
@@ -50,40 +51,68 @@ class SSAOptimizer:
         self.population = Population(self.population_size, self.genome_config)
         self.population.initialize_random()
         self.iteration = 0
+        self.history = {
+            'best_fitness': [],
+            'worst_fitness': [],
+            'mean_fitness': [],
+            'std_fitness': [],
+            'improvements': 0
+        }
     
-    def optimize(self, fitness_function, early_stopping_patience=10):
+    def optimize(self, 
+                 fitness_function: Callable, 
+                 early_stopping_patience: int = 10,
+                 progress_callback: Optional[Callable] = None,
+                 verbose: bool = True):
         """
         Run SSA optimization.
         
         Args:
-            fitness_function: Function that takes squirrel and returns fitness score
-                            Lower fitness is better
+            fitness_function: Function that takes squirrel and returns fitness (lower is better)
             early_stopping_patience: Stop if no improvement for N iterations
+            progress_callback: Optional callback for progress updates
+                              Signature: callback(iteration, best_fitness, improved, phase)
+            verbose: Whether to print progress (used if no callback provided)
         
         Returns:
-            (best_squirrel, evolution_history)
+            (best_squirrel, history)
         """
         self.initialize()
         
-        # Evaluate initial population
-        for squirrel in self.population.squirrels:
+        # Phase 1: Evaluate initial population
+        if progress_callback:
+            progress_callback(0, None, False, 'init_start')
+        
+        for i, squirrel in enumerate(self.population.squirrels):
             fitness = fitness_function(squirrel)
-            squirrel.update_fitness(fitness, self.iteration)
+            squirrel.update_fitness(fitness, 0)
+            if progress_callback:
+                progress_callback(i + 1, None, False, 'init_eval')
         
         self.best_squirrel = self.population.get_best_squirrel()
         self._record_iteration()
         
+        if progress_callback:
+            progress_callback(0, self.best_squirrel.fitness, False, 'init_complete')
+        elif verbose:
+            print(f"Initial best fitness: {self.best_squirrel.fitness:.6f}")
+        
+        # Phase 2: Main optimization loop
         no_improvement_count = 0
         
-        # Main optimization loop
-        for self.iteration in range(1, self.max_iterations):
+        for iteration in range(1, self.max_iterations + 1):
+            self.iteration = iteration
+            
+            if progress_callback:
+                progress_callback(iteration, self.best_squirrel.fitness, False, 'iter_start')
+            
             # Update positions using SSA movement
             Movement.update_population(
                 self.population,
                 self.best_squirrel,
                 Gc=self.Gc,
                 Pdp=self.Pdp,
-                iteration=self.iteration,
+                iteration=iteration,
                 max_iterations=self.max_iterations
             )
             
@@ -91,23 +120,40 @@ class SSAOptimizer:
             for squirrel in self.population.squirrels:
                 if not squirrel.evaluated:
                     fitness = fitness_function(squirrel)
-                    squirrel.update_fitness(fitness, self.iteration)
+                    squirrel.update_fitness(fitness, iteration)
             
             # Update best squirrel
             current_best = self.population.get_best_squirrel()
+            improved = False
+            
             if current_best.is_better_than(self.best_squirrel):
                 self.best_squirrel = current_best.copy()
                 no_improvement_count = 0
+                improved = True
+                self.history['improvements'] += 1
             else:
                 no_improvement_count += 1
             
-            # Record progress
             self._record_iteration()
+            
+            if progress_callback:
+                progress_callback(iteration, self.best_squirrel.fitness, improved, 'iter_complete')
+            elif verbose:
+                status = "★ Improved!" if improved else ""
+                print(f"Iteration {iteration}/{self.max_iterations} | "
+                      f"Best: {self.best_squirrel.fitness:.6f} {status}")
             
             # Early stopping
             if no_improvement_count >= early_stopping_patience:
-                print(f"Early stopping at iteration {self.iteration}")
+                if progress_callback:
+                    progress_callback(iteration, self.best_squirrel.fitness, False, 'early_stop')
+                elif verbose:
+                    print(f"\nEarly stopping at iteration {iteration} "
+                          f"(no improvement for {early_stopping_patience} iterations)")
                 break
+        
+        if progress_callback:
+            progress_callback(self.iteration, self.best_squirrel.fitness, False, 'complete')
         
         return self.best_squirrel, self.history
     
@@ -119,15 +165,6 @@ class SSAOptimizer:
         self.history['worst_fitness'].append(stats['worst'])
         self.history['mean_fitness'].append(stats['mean'])
         self.history['std_fitness'].append(stats['std'])
-        
-        # save population snapshot (memory intensive)
-        if self.iteration % 10 == 0:
-            snapshot = {
-                'iteration': self.iteration,
-                'best_fitness': self.best_squirrel.fitness,
-                'population_size': len(self.population)
-            }
-            self.history['population_snapshots'].append(snapshot)
     
     def get_best_prompts(self, decoder, top_k=5):
         """
@@ -143,28 +180,14 @@ class SSAOptimizer:
         evaluated = [s for s in self.population.squirrels if s.evaluated]
         evaluated.sort(key=lambda s: s.fitness)
         
-        best_prompts = []
-        for i, squirrel in enumerate(evaluated[:top_k]):
-            prompt = decoder.decode(squirrel.genome)
-            best_prompts.append((prompt, squirrel.fitness))
-        
-        return best_prompts
+        return [(decoder.decode(s.genome), s.fitness) for s in evaluated[:top_k]]
     
     def save_history(self, filepath):
         """Save evolution history to JSON"""
-        # Convert numpy arrays to lists for JSON serialization
-        history_json = {
-            'best_fitness': self.history['best_fitness'],
-            'worst_fitness': self.history['worst_fitness'],
-            'mean_fitness': self.history['mean_fitness'],
-            'std_fitness': self.history['std_fitness'],
-            'population_snapshots': self.history['population_snapshots']
-        }
-        
         with open(filepath, 'w') as f:
-            json.dump(history_json, f, indent=2)
+            json.dump(self.history, f, indent=2)
     
     def __str__(self):
-        return (f"SSAOptimizer(population_size={self.population_size}, "
-                f"max_iterations={self.max_iterations}, "
-                f"best_fitness={self.best_squirrel.fitness if self.best_squirrel else None})")
+        best_fit = self.best_squirrel.fitness if self.best_squirrel else None
+        return (f"SSAOptimizer(pop={self.population_size}, "
+                f"max_iter={self.max_iterations}, best={best_fit})")

@@ -17,3 +17,6 @@ urllib3
 matplotlib
 huggingface_hub
 datasets
+tqdm
+scipy
+seaborn
