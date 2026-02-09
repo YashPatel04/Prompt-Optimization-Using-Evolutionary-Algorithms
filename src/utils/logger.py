@@ -1,6 +1,6 @@
 import logging
 import sys
-import io
+import os
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -9,7 +9,7 @@ from typing import Optional
 class Logger:
     """
     Centralized logging for the entire system.
-    Logs to both file and console.
+    Logs to both file and console with proper Linux support.
     """
     
     def __init__(self, 
@@ -17,110 +17,154 @@ class Logger:
                  log_dir: str = "outputs/logs",
                  log_level: int = logging.INFO):
         """
-        Initialize logger.
+        Initialize logger with file and console handlers.
         
         Args:
             name: Logger name
             log_dir: Directory to save log files
-            log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+            log_level: Logging level
         """
-        self.log_dir = Path(log_dir)
-        self.log_dir.mkdir(parents=True, exist_ok=True)
+        self.lg_dir = Path(log_dir)
+        self.lg_dir.mkdir(parents=True, exist_ok=True)
         
-        self.logger = logging.getLogger(name)
-        self.logger.setLevel(log_level)
+        # Create logger
+        self.lgr = logging.getLogger(name)
+        self.lgr.setLevel(log_level)
+        self.lgr.propagate = False
         
-        # Prevent duplicate handlers
-        if self.logger.hasHandlers():
-            self.logger.handlers.clear()
+        # Remove existing handlers
+        self.lgr.handlers = []
         
-        # Create formatters
-        detailed_formatter = logging.Formatter(
-            '[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s',
+        # Create log file with timestamp
+        lg_file = self.lg_dir / f"log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        self.lg_file = str(lg_file)
+        
+        # Detailed formatter for file
+        det_fmt = logging.Formatter(
+            '[%(asctime)s] [%(levelname)s] %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
-        simple_formatter = logging.Formatter(
+        
+        # Simple formatter for console
+        simp_fmt = logging.Formatter(
             '[%(levelname)s] %(message)s'
         )
         
-        # Fix Windows encoding issue
-        if sys.platform == 'win32':
-            # Force UTF-8 for Windows console
-            if hasattr(sys.stdout, 'buffer'):
-                sys.stdout = io.TextIOWrapper(
-                    sys.stdout.buffer,
-                    encoding='utf-8',
-                    errors='replace'
-                )
-            if hasattr(sys.stderr, 'buffer'):
-                sys.stderr = io.TextIOWrapper(
-                    sys.stderr.buffer,
-                    encoding='utf-8',
-                    errors='replace'
-                )
+        # File handler - write everything to file
+        try:
+            file_hdlr = logging.FileHandler(
+                lg_file,
+                encoding='utf-8',
+                mode='w'
+            )
+            file_hdlr.setLevel(logging.DEBUG)  # Capture everything in file
+            file_hdlr.setFormatter(det_fmt)
+            self.lgr.addHandler(file_hdlr)
+        except Exception as e:
+            print(f"[WARNING] Could not create file handler: {e}")
         
-        # Console handler (simple format)
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(log_level)
-        console_handler.setFormatter(simple_formatter)
-        # Set encoding explicitly
-        if hasattr(console_handler, 'setEncoding'):
-            console_handler.setEncoding('utf-8')
-        self.logger.addHandler(console_handler)
-        
-        # File handler (detailed format) - UTF-8 encoding
-        log_file = self.log_dir / f"log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        file_handler = logging.FileHandler(log_file, encoding='utf-8')
-        file_handler.setLevel(log_level)
-        file_handler.setFormatter(detailed_formatter)
-        self.logger.addHandler(file_handler)
-        
-        self.log_file = log_file
+        # Console handler - show everything (same as file)
+        cons_hdlr = logging.StreamHandler(sys.stdout)
+        cons_hdlr.setLevel(logging.DEBUG)  # Show all messages on console
+        cons_hdlr.setFormatter(simp_fmt)
+        self.lgr.addHandler(cons_hdlr)
     
-    def info(self, message: str):
+    def info(self, msg: str):
         """Log info message"""
-        # Replace checkmarks with [OK] for compatibility
-        message = message.replace('✓', '[OK]').replace('✗', '[FAIL]')
-        self.logger.info(message)
+        msg = self._sanitize_msg(msg)
+        self.lgr.info(msg)
+        self._flush()
     
-    def debug(self, message: str):
+    def debug(self, msg: str):
         """Log debug message"""
-        message = message.replace('✓', '[OK]').replace('✗', '[FAIL]')
-        self.logger.debug(message)
+        msg = self._sanitize_msg(msg)
+        self.lgr.debug(msg)
+        self._flush()
     
-    def warning(self, message: str):
+    def warning(self, msg: str):
         """Log warning message"""
-        message = message.replace('✓', '[OK]').replace('✗', '[FAIL]')
-        self.logger.warning(message)
+        msg = self._sanitize_msg(msg)
+        self.lgr.warning(msg)
+        self._flush()
     
-    def error(self, message: str):
+    def error(self, msg: str):
         """Log error message"""
-        message = message.replace('✓', '[OK]').replace('✗', '[FAIL]')
-        self.logger.error(message)
+        msg = self._sanitize_msg(msg)
+        self.lgr.error(msg)
+        self._flush()
     
-    def critical(self, message: str):
+    def critical(self, msg: str):
         """Log critical message"""
-        message = message.replace('✓', '[OK]').replace('✗', '[FAIL]')
-        self.logger.critical(message)
+        msg = self._sanitize_msg(msg)
+        self.lgr.critical(msg)
+        self._flush()
     
     def section(self, title: str):
         """Log a section header"""
-        title = title.replace('✓', '[OK]').replace('✗', '[FAIL]')
-        self.info(f"\n{'='*60}")
+        title = self._sanitize_msg(title)
+        separator = "="*60
+        self.info(f"\n{separator}")
         self.info(f"  {title}")
-        self.info(f"{'='*60}\n")
+        self.info(f"{separator}\n")
+    
+    def _flush(self):
+        """Flush all handlers to disk"""
+        for handler in self.lgr.handlers:
+            if hasattr(handler, 'flush'):
+                try:
+                    handler.flush()
+                except Exception:
+                    pass
+    
+    def _sanitize_msg(self, msg: str) -> str:
+        """Convert special characters to ASCII for Linux compatibility"""
+        if not isinstance(msg, str):
+            msg = str(msg)
+        
+        replacements = {
+            '✓': '[OK]',
+            '✗': '[FAIL]',
+            '█': '#',
+            '░': '-',
+            '→': '->',
+            '★': '*',
+            '╔': '+',
+            '╚': '+',
+            '║': '|',
+            '═': '=',
+            '⠋': '.',
+            '⠙': '.',
+            '⠹': '.',
+            '⠸': '.',
+            '⠼': '.',
+            '⠴': '.',
+            '⠦': '.',
+            '⠧': '.',
+            '⠇': '.',
+            '⠏': '.',
+        }
+        for special, ascii_char in replacements.items():
+            msg = msg.replace(special, ascii_char)
+        return msg
     
     def get_log_file(self) -> str:
         """Get path to current log file"""
-        return str(self.log_file)
+        return self.lg_file
 
 
 # Global logger instance
-_logger = None
+_lgr_inst = None
+_lgr_dir = None
 
-def get_logger(name: str = "SSA-PromptTuning") -> Logger:
+def get_logger(name: str = "SSA-PromptTuning", log_dir: Optional[str] = None) -> Logger:
     """Get or create global logger instance"""
-    global _logger
-    if _logger is None:
-        _logger = Logger(name)
-    return _logger
+    global _lgr_inst, _lgr_dir
+    
+    # Reset logger if log_dir changes
+    if log_dir is not None and log_dir != _lgr_dir:
+        _lgr_inst = None
+        _lgr_dir = log_dir
+    
+    if _lgr_inst is None:
+        _lgr_inst = Logger(name, log_dir=log_dir or "outputs/logs")
+    return _lgr_inst

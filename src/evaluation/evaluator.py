@@ -23,6 +23,8 @@ class Evaluator:
         self.fitness_calc = fitness_calculator
         self.cache = cache
         self.eval_times = []
+        self.total_input_tokens = 0
+        self.total_output_tokens = 0
     
     def evaluate_prompt(self, prompt: str, 
                        samples: List[Dict],
@@ -59,8 +61,10 @@ class Evaluator:
                     responses.append(cached)
                     continue
             
-            # Generate response
-            response = self.llm.generate(full_prompt)
+            # Generate response with token tracking
+            response, input_tokens, output_tokens = self.llm.generate_with_tokens(full_prompt)
+            self.total_input_tokens += input_tokens
+            self.total_output_tokens += output_tokens
             responses.append(response)
             
             # Cache it
@@ -91,3 +95,11 @@ class Evaluator:
         if not self.eval_times:
             return 0.0
         return sum(self.eval_times) / len(self.eval_times)
+    
+    def get_token_stats(self) -> dict:
+        """Get token usage statistics"""
+        return {
+            'total_input_tokens': self.total_input_tokens,
+            'total_output_tokens': self.total_output_tokens,
+            'total_tokens': self.total_input_tokens + self.total_output_tokens
+        }

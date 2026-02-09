@@ -34,6 +34,8 @@ class OllamaInterface:
         
         self.api_endpoint = f"{self.base_url}/api/generate"
         self.request_count = 0
+        self.total_input_tokens = 0
+        self.total_output_tokens = 0
         
         # Check connection
         self._check_connection()
@@ -105,9 +107,67 @@ class OllamaInterface:
             result = response.json()
             generated_text = result.get('response', '').strip()
             
+            # Track tokens
+            input_tokens = result.get('prompt_eval_count', 0)
+            output_tokens = result.get('eval_count', 0)
+            self.total_input_tokens += input_tokens
+            self.total_output_tokens += output_tokens
+            
             self.request_count += 1
             
             return generated_text
+        
+        except requests.exceptions.Timeout:
+            raise TimeoutError(f"Request timeout after {self.timeout}s")
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Ollama request failed: {e}")
+    
+    def generate_with_tokens(self, prompt: str) -> tuple:
+        """
+        Generate response from Ollama and return tokens.
+        
+        Args:
+            prompt: Input prompt
+        
+        Returns:
+            Tuple of (generated_text, input_tokens, output_tokens)
+        """
+        payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": False,
+            "temperature": self.temperature,
+            "keep_alive": self.keep_alive,
+            "options": {
+                "num_predict": 5,
+                "num_ctx": 512,
+                "top_p": 0.9,
+                "top_k": 40,
+            }
+        }
+        
+        try:
+            response = requests.post(
+                self.api_endpoint,
+                json=payload,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            
+            result = response.json()
+            generated_text = result.get('response', '').strip()
+            
+            # Extract token counts
+            input_tokens = result.get('prompt_eval_count', 0)
+            output_tokens = result.get('eval_count', 0)
+            
+            # Track totals
+            self.total_input_tokens += input_tokens
+            self.total_output_tokens += output_tokens
+            
+            self.request_count += 1
+            
+            return generated_text, input_tokens, output_tokens
         
         except requests.exceptions.Timeout:
             raise TimeoutError(f"Request timeout after {self.timeout}s")
@@ -118,6 +178,11 @@ class OllamaInterface:
         """Get usage statistics"""
         return {
             'requests_processed': self.request_count,
+            'total_input_tokens': self.total_input_tokens,
+            'total_output_tokens': self.total_output_tokens,
+            'total_tokens': self.total_input_tokens + self.total_output_tokens,
+            'avg_input_per_request': self.total_input_tokens / self.request_count if self.request_count > 0 else 0,
+            'avg_output_per_request': self.total_output_tokens / self.request_count if self.request_count > 0 else 0,
             'model': self.model,
             'keep_alive': self.keep_alive,
         }

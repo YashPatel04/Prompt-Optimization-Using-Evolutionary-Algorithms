@@ -153,9 +153,6 @@ def get_user_config(config_data: dict) -> ExperimentConfig:
     patience_input = input("Enter patience (or press Enter for default): ").strip()
     early_stopping_patience = int(patience_input) if patience_input else default_patience
     
-    # Use perturbation?
-    perturbation = input("\nUse input perturbation? (y/n, default: n): ").strip().lower() == 'y'
-    
     # Experiment name
     experiment_name = input("\nExperiment name (default: ssa_sentiment_optimization): ").strip()
     if not experiment_name:
@@ -173,7 +170,6 @@ def get_user_config(config_data: dict) -> ExperimentConfig:
     print(f"Gc (gravity):          {Gc}")
     print(f"Pdp (predation):       {Pdp}")
     print(f"Early stopping:        {early_stopping_patience} iterations")
-    print(f"Input perturbation:    {perturbation}")
     print(f"Experiment name:       {experiment_name}")
     print("="*60 + "\n")
     
@@ -194,7 +190,6 @@ def get_user_config(config_data: dict) -> ExperimentConfig:
         ollama_temperature=temperature,
         early_stopping_patience=early_stopping_patience,
         use_cache=config_data['evaluation']['use_cache'],
-        use_perturbation=perturbation,
         experiment_name=experiment_name,
         output_dir=config_data['experiment']['output_dir'],
         seed=config_data['experiment']['seed']

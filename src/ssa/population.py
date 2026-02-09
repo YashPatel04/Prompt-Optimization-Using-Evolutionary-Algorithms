@@ -27,7 +27,7 @@ class Population:
         self.squirrels = []
         for i in range(self.size):
             genome = Genome(config=self.genome_config)
-            squirrel_type = self._assign_squirrel_type(i)
+            squirrel_type a = self._assign_squirrel_type(i)
             squirrel = Squirrel(genome, squirrel_type)
             squirrel.iteration_created = self.iteration
             self.squirrels.append(squirrel)
