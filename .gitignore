@@ -1,5 +1,5 @@
 generate.py
 /data/cache
-
+test_runs/
 __pycache__/
 /outputs/cache/*

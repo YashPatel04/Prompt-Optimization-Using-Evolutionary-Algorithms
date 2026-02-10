@@ -82,3 +82,5 @@ ssa-prompt-tuning/
     ├── checkpoints/                # Save population states
     └── final_results/
 ```
+
+`nohup python scripts/final.py > nohup.out 2>&1 &`

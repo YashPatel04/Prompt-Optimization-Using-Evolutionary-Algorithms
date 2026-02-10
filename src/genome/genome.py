@@ -12,16 +12,16 @@ class GenomeConfig:
     def __post_init__(self):
         if self.ranges=={}:
             self.ranges = {
-                'instruction_template': (0, 5.99),      # Will int to 0-5
+                'instruction_template': (0, 15.99),     # Will int to 0-15 (16 templates)
                 'add_reasoning': (0, 1.99),             # Will int to 0-1 (TRUE BINARY)
-                'reasoning_template': (0, 4.99),        # Will int to 0-4
-                'output_format': (0, 5.99),             # Will int to 0-5
+                'reasoning_template': (0, 12.99),       # Will int to 0-12 (13 templates)
+                'output_format': (0, 14.99),            # Will int to 0-14 (15 templates)
                 'constraint_strength': (0, 1),          # Continuous 0-1
                 'add_role': (0, 1.99),                  # Will int to 0-1 (TRUE BINARY)
-                'role_template': (0, 3.99),             # Will int to 0-3
+                'role_template': (0, 11.99),            # Will int to 0-11 (12 templates)
                 'synonym_intensity': (0, 1),            # Continuous 0-1
                 'add_examples': (0, 1.99),              # Will int to 0-1 (TRUE BINARY)
-                'example_count': (0, 5.99),             # Will int to 0-5
+                'example_count': (0, 8.99),             # Will int to 0-8 (9 templates)
             }
 
 class Genome:

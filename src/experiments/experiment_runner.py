@@ -146,12 +146,20 @@ class ExperimentRunner:
     
     def save_checkpoint(self, iteration: int, best_fitness: float, population_data: Dict):
         """Save checkpoint during optimization"""
+        # Get token information for this checkpoint
+        iteration_tokens = self.token_tracker.get_iteration_tokens(iteration)
+        token_totals = self.token_tracker.get_total_tokens()
+        
         chkpt_data = {
             'iteration': iteration,
             'best_fitness': float(best_fitness),
             'timestamp': datetime.now().isoformat(),
             'population': population_data,
-            'config': self.config.to_dict()
+            'config': self.config.to_dict(),
+            'token_tracking': {
+                'iteration': iteration_tokens,
+                'cumulative': token_totals
+            }
         }
         
         chkpt_file = self.dirs['checkpoints'] / f"checkpoint_iter_{iteration:04d}.json"
@@ -165,13 +173,21 @@ class ExperimentRunner:
         """Save checkpoint for best solution found"""
         best_prompt = self.genome_decoder.decode(best_squirrel.genome)
         
+        # Get token information for this checkpoint
+        iteration_tokens = self.token_tracker.get_iteration_tokens(iteration)
+        token_totals = self.token_tracker.get_total_tokens()
+        
         best_chkpt = {
             'iteration': iteration,
             'fitness': float(best_squirrel.fitness),
             'genome': best_squirrel.genome.vector.tolist(),
             'prompt': best_prompt,
             'squirrel_type': best_squirrel.squirrel_type,
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            'token_tracking': {
+                'iteration': iteration_tokens,
+                'cumulative': token_totals
+            }
         }
         
         chkpt_file = self.dirs['checkpoints'] / "best_solution.json"
@@ -803,55 +819,75 @@ class ExperimentRunner:
         spinner.start()
         
         plots_generated = []
+        plots_failed = []
         
-        # 1. Basic convergence plot
-        path = self.dirs['figures'] / 'convergence.png'
-        self.visualizer.plot_convergence(history, save_path=str(path))
-        plots_generated.append('convergence.png')
+        # Define all plots to generate
+        plot_configs = [
+            ('convergence.png', 
+             lambda p: self.visualizer.plot_convergence(history, save_path=str(p))),
+            
+            ('fitness_distribution.png', 
+             lambda p: self.visualizer.plot_fitness_distribution(history['best_fitness'], save_path=str(p))),
+            
+            ('ssa_proof.png', 
+             lambda p: self.visualizer.plot_ssa_proof(history, save_path=str(p))),
+            
+            ('exploration_exploitation.png', 
+             lambda p: self.visualizer.plot_exploration_exploitation(history, save_path=str(p))),
+            
+            ('improvement_heatmap.png', 
+             lambda p: self.visualizer.plot_improvement_heatmap(history, save_path=str(p))),
+            
+            ('cumulative_improvement.png', 
+             lambda p: self.visualizer.plot_cumulative_improvement(history, save_path=str(p))),
+            
+            ('population_statistics.png', 
+             lambda p: self.visualizer.plot_population_statistics(history, save_path=str(p))),
+            
+            ('final_summary.png', 
+             lambda p: self.visualizer.plot_final_summary(self.results, save_path=str(p)))
+        ]
         
-        # 2. Fitness distribution
-        path = self.dirs['figures'] / 'fitness_distribution.png'
-        self.visualizer.plot_fitness_distribution(
-            history['best_fitness'], save_path=str(path)
-        )
-        plots_generated.append('fitness_distribution.png')
+        # Generate each plot with error handling
+        for plot_name, plot_fn in plot_configs:
+            try:
+                path = self.dirs['figures'] / plot_name
+                plot_fn(path)
+                
+                # Verify file was created
+                if path.exists():
+                    plots_generated.append(plot_name)
+                    self.logger.debug(f"  [OK] {plot_name} ({path.stat().st_size} bytes)")
+                else:
+                    plots_failed.append((plot_name, "File not created on disk"))
+                    self.logger.warning(f"  [FAIL] {plot_name} - file not created after plotting")
+                
+            except Exception as e:
+                plots_failed.append((plot_name, str(e)))
+                self.logger.error(f"  [FAIL] {plot_name} - {type(e).__name__}: {e}")
         
-        # 3. SSA proof (2x2 grid)
-        path = self.dirs['figures'] / 'ssa_proof.png'
-        self.visualizer.plot_ssa_proof(history, save_path=str(path))
-        plots_generated.append('ssa_proof.png')
+        spinner.stop(f"Generated {len(plots_generated)}/{len(plot_configs)} visualizations")
+        print()
         
-        # 4. Exploration vs Exploitation
-        path = self.dirs['figures'] / 'exploration_exploitation.png'
-        self.visualizer.plot_exploration_exploitation(history, save_path=str(path))
-        plots_generated.append('exploration_exploitation.png')
-        
-        # 5. Improvement heatmap
-        path = self.dirs['figures'] / 'improvement_heatmap.png'
-        self.visualizer.plot_improvement_heatmap(history, save_path=str(path))
-        plots_generated.append('improvement_heatmap.png')
-        
-        # 6. Cumulative improvement
-        path = self.dirs['figures'] / 'cumulative_improvement.png'
-        self.visualizer.plot_cumulative_improvement(history, save_path=str(path))
-        plots_generated.append('cumulative_improvement.png')
-        
-        # 7. Population statistics (2x2 grid)
-        path = self.dirs['figures'] / 'population_statistics.png'
-        self.visualizer.plot_population_statistics(history, save_path=str(path))
-        plots_generated.append('population_statistics.png')
-        
-        # 8. Final summary (publication-ready)
-        path = self.dirs['figures'] / 'final_summary.png'
-        self.visualizer.plot_final_summary(self.results, save_path=str(path))
-        plots_generated.append('final_summary.png')
-        
-        spinner.stop(f"Generated {len(plots_generated)} visualizations")
-        
+        # Log results
+        self.logger.info("Plot generation results:")
         for plot in plots_generated:
-            self.logger.info(f"  [OK] {plot}")
+            self.logger.info(f"  [✓] {plot}")
+        
+        if plots_failed:
+            self.logger.warning(f"Failed to generate {len(plots_failed)} plots:")
+            for plot_name, error in plots_failed:
+                self.logger.warning(f"  [✗] {plot_name}: {error}")
         
         self.logger.info(f"Saved to: {self.dirs['figures']}")
+        
+        # Print summary to console
+        if plots_failed:
+            print(f"[WARNING] {len(plots_failed)} plots failed to generate:")
+            for plot_name, error in plots_failed:
+                print(f"  - {plot_name}: {error}")
+        else:
+            print(f"[SUCCESS] All {len(plots_generated)} plots generated successfully\n")
 
     def run_post_analysis(self):
         """Run detailed post-experiment analysis"""
@@ -1002,6 +1038,82 @@ class ExperimentRunner:
         self.logger.info(f"Prompt:  {prompt_file}")
         print(f"  Checkpoints: {self.chkpt_cnt} saved\n")
     
+    def _verify_outputs(self):
+        """Verify that all expected output files were created"""
+        print("\n" + "="*80)
+        print("VERIFYING OUTPUT FILES".center(80))
+        print("="*80 + "\n")
+        self.logger.section("VERIFYING OUTPUT FILES")
+        
+        # Expected file patterns
+        expected_files = {
+            'Results': [
+                f"{self.config.experiment_name}_results.json",
+                f"{self.config.experiment_name}_config.json",
+                f"{self.config.experiment_name}_best_prompt.txt"
+            ],
+            'Figures': [
+                'convergence.png',
+                'fitness_distribution.png',
+                'ssa_proof.png',
+                'exploration_exploitation.png',
+                'improvement_heatmap.png',
+                'cumulative_improvement.png',
+                'population_statistics.png',
+                'final_summary.png'
+            ],
+            'Analysis': [
+                f"{self.config.experiment_name}_mutation_impact.csv",
+                f"{self.config.experiment_name}_prompt_evolution.csv",
+                f"{self.config.experiment_name}_cost_analysis.csv",
+                f"{self.config.experiment_name}_mutations.png",
+                f"{self.config.experiment_name}_costs.png"
+            ]
+        }
+        
+        verification_results = {}
+        total_found = 0
+        total_expected = 0
+        
+        for category, files in expected_files.items():
+            dir_path = self.dirs[category.lower()]
+            found = 0
+            
+            print(f"{category} ({dir_path}):")
+            for filename in files:
+                file_path = dir_path / filename
+                total_expected += 1
+                
+                if file_path.exists():
+                    file_size = file_path.stat().st_size
+                    print(f"  [✓] {filename:45s} ({file_size:,} bytes)")
+                    found += 1
+                    total_found += 1
+                else:
+                    print(f"  [✗] {filename:45s} (NOT FOUND)")
+                    self.logger.warning(f"Missing file: {file_path}")
+            
+            verification_results[category] = f"{found}/{len(files)}"
+            print()
+        
+        # Summary
+        print("="*80)
+        print("VERIFICATION SUMMARY".center(80))
+        print("="*80 + "\n")
+        
+        for category, count in verification_results.items():
+            print(f"  {category:20s}: {count}")
+        
+        print(f"\n  Total: {total_found}/{total_expected} files saved")
+        
+        if total_found == total_expected:
+            print(f"\n  [✓] SUCCESS: All {total_expected} expected files were created!\n")
+            self.logger.info(f"[✓] verification complete - all {total_expected} files found")
+        else:
+            missing = total_expected - total_found
+            print(f"\n  [!] WARNING: {missing} files are missing\n")
+            self.logger.warning(f"[!] Verification failed - {missing} files not found")
+    
     def _make_json_serializable(self, obj):
         """Convert numpy types to Python types for JSON serialization"""
         if isinstance(obj, dict):
@@ -1050,10 +1162,13 @@ class ExperimentRunner:
             # Step 8: Analyze results
             self.analyze_results()
             
-            # Step 9: Generate visualizations
+            # Step 9: Run post-analysis (detailed reports)
+            self.run_post_analysis()
+            
+            # Step 10: Generate visualizations
             self.generate_visualizations()
             
-            # Step 10: Save results
+            # Step 11: Save results
             self.save_results()
             
             self.logger.section("[OK] EXPERIMENT COMPLETE")
@@ -1061,6 +1176,9 @@ class ExperimentRunner:
             self.logger.info(f"Figures saved to: {self.dirs['figures']}")
             self.logger.info(f"Analysis saved to: {self.dirs['analysis']}")
             self.logger.info(f"Checkpoints saved to: {self.dirs['checkpoints']}")
+            
+            # Verify files were actually saved
+            self._verify_outputs()
             
             return self.results
         

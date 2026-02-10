@@ -1,3 +1,4 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
@@ -14,20 +15,85 @@ class Visualizer:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
-        # Set publication style
-        plt.style.use('seaborn-v0_8-whitegrid')
-        plt.rcParams.update({
-            'font.size': 12,
-            'axes.labelsize': 14,
-            'axes.titlesize': 16,
-            'xtick.labelsize': 12,
-            'ytick.labelsize': 12,
-            'legend.fontsize': 11,
-            'figure.titlesize': 18,
-            'font.family': 'serif',
-            'axes.grid': True,
-            'grid.alpha': 0.3
-        })
+        # Configure matplotlib backend for headless operation
+        try:
+            matplotlib.use('Agg')  # Use non-interactive backend
+        except Exception as e:
+            print(f"[WARNING] Could not set matplotlib backend: {e}")
+        
+        # Set publication style with fallback
+        try:
+            # Try newer seaborn style first
+            plt.style.use('seaborn-v0_8-whitegrid')
+        except (OSError, ValueError):
+            try:
+                # Fallback to older seaborn style
+                plt.style.use('seaborn-whitegrid')
+            except (OSError, ValueError):
+                try:
+                    # Final fallback to default style
+                    plt.style.use('default')
+                except (OSError, ValueError):
+                    print("[WARNING] Could not load any matplotlib style - using defaults")
+        
+        # Configure matplotlib parameters
+        try:
+            plt.rcParams.update({
+                'font.size': 12,
+                'axes.labelsize': 14,
+                'axes.titlesize': 16,
+                'xtick.labelsize': 12,
+                'ytick.labelsize': 12,
+                'legend.fontsize': 11,
+                'figure.titlesize': 18,
+                'font.family': 'serif',
+                'axes.grid': True,
+                'grid.alpha': 0.3,
+                'savefig.dpi': 300,
+                'savefig.bbox': 'tight',
+                'figure.autolayout': True
+            })
+        except Exception as e:
+            print(f"[WARNING] Could not configure matplotlib parameters: {e}")
+    
+    def _save_figure(self, fig, save_path: str) -> bool:
+        """
+        Safely save figure to disk with error handling.
+        
+        Args:
+            fig: matplotlib figure object
+            save_path: path where to save the figure
+            
+        Returns:
+            bool: True if saved successfully, False otherwise
+        """
+        try:
+            # Ensure parent directory exists
+            Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+            
+            # Save figure
+            fig.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.close(fig)
+            
+            # Verify file was created
+            if Path(save_path).exists():
+                return True
+            else:
+                print(f"[ERROR] Figure saved but file not found: {save_path}")
+                return False
+                
+        except PermissionError as e:
+            print(f"[ERROR] Permission denied saving figure: {save_path} - {e}")
+            plt.close(fig)
+            return False
+        except IOError as e:
+            print(f"[ERROR] IO error saving figure: {save_path} - {e}")
+            plt.close(fig)
+            return False
+        except Exception as e:
+            print(f"[ERROR] Unexpected error saving figure: {save_path} - {type(e).__name__}: {e}")
+            plt.close(fig)
+            return False
     
     def plot_convergence(self, history: Dict, save_path: Optional[str] = None):
         """Plot fitness convergence over iterations"""
@@ -48,8 +114,7 @@ class Visualizer:
         plt.tight_layout()
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.close()
+            self._save_figure(fig, save_path)
         else:
             plt.show()
         
@@ -74,8 +139,7 @@ class Visualizer:
         plt.tight_layout()
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.close()
+            self._save_figure(fig, save_path)
         else:
             plt.show()
         
@@ -138,8 +202,7 @@ class Visualizer:
         plt.tight_layout()
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.close()
+            self._save_figure(fig, save_path)
         else:
             plt.show()
         
@@ -175,8 +238,7 @@ class Visualizer:
         plt.tight_layout()
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.close()
+            self._save_figure(fig, save_path)
         else:
             plt.show()
         
@@ -208,8 +270,7 @@ class Visualizer:
         plt.tight_layout()
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.close()
+            self._save_figure(fig, save_path)
         else:
             plt.show()
         
@@ -249,8 +310,7 @@ class Visualizer:
         plt.tight_layout()
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.close()
+            self._save_figure(fig, save_path)
         else:
             plt.show()
         
@@ -319,8 +379,7 @@ class Visualizer:
         plt.tight_layout()
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.close()
+            self._save_figure(fig, save_path)
         else:
             plt.show()
         
@@ -453,8 +512,7 @@ class Visualizer:
                     fontsize=18, fontweight='bold', y=0.98)
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.close()
+            self._save_figure(fig, save_path)
         else:
             plt.show()
         

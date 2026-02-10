@@ -1,9 +1,12 @@
 experiment:
-  name: "ssa_sentiment_optimization"
+  name: "ssa_sentiment"
   seed: 42
-  output_dir: "outputs"
+  output_dir: "outputs/"
 
 dataset:
+  # Default size to use (can be: tiny, small, medium, large, full, or custom number)
+  default_size: "medium"  # Options: tiny (10), small (50), medium (100), large (1000), full (31000)
+  
   # Predefined dataset sizes for quick experiments
   sizes:
     tiny: 10
@@ -23,25 +26,19 @@ ssa:
 
 llm:
   # Ollama configuration
+  model: "gemma3:270m"
   base_url: "http://localhost:1561"
-  models:
-    fast: "gemma3:270m"      # Small, fast
-    balanced: "llama3.1:8b" # Medium
-    powerful: "qwen2.5:32b"     # Larger
-  
-  default_model: "gemma3:270m"
   temperature: 0.0        # Deterministic
   timeout: 300            # seconds
   keep_alive: "5m"  # 5 minutes, "1h" = 1 hour, "0" = never unload
-  # Batch size for processing
   batch_size: 10
 
 evaluation:
   use_cache: true
   cache_dir: "data/cache"
   fitness_metric: "combined"  # accuracy, f1, or combined
-  use_perturbation: false
   sample_size_cap: 100    # Cap evaluation set size
+  checkpoint_interval: 5
 
 output:
   save_logs: true
